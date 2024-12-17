@@ -38,6 +38,26 @@ impl Vector2i {
 
         Vector2i { x, y }
     }
+
+    pub const DIRECTION_VECTORS: [Vector2i; 4] = [
+        Vector2i { x: 1, y: 0 },
+        Vector2i { x: -1, y: 0 },
+        Vector2i { x: 0, y: 1 },
+        Vector2i { x: 0, y: -1 },
+    ];
+
+    pub fn rotate_right(self: Vector2i) -> Vector2i {
+        Vector2i {
+            x: -self.y,
+            y: self.x,
+        }
+    }
+    pub fn rotate_left(self: Vector2i) -> Vector2i {
+        Vector2i {
+            x: self.y,
+            y: -self.x,
+        }
+    }
 }
 
 impl std::ops::Add for Vector2i {
