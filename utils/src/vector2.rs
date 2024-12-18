@@ -1,3 +1,7 @@
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::hash::Hash;
+
 #[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
 pub struct Vector2i {
     pub x: i64,
@@ -19,6 +23,48 @@ fn test() {
         Vector2i::new(3, 2) - Vector2i::new(2, 1),
         Vector2i::new(1, 1)
     );
+}
+
+pub fn dijkstra<T>(
+    graph: HashMap<T, Vec<(usize, T)>>,
+    starting_position: T,
+) -> HashMap<T, (usize, Vec<T>)>
+where
+    T: Eq + std::fmt::Debug,
+    T: Hash,
+    T: Copy,
+{
+    let mut unvisited: HashSet<T> = graph.keys().cloned().collect();
+    let mut distances: HashMap<T, (usize, Vec<T>)> = HashMap::from_iter(
+        unvisited
+            .iter()
+            .cloned()
+            .map(|position| (position, (usize::MAX, Vec::new()))),
+    );
+    *distances.get_mut(&starting_position).unwrap() = (0, Vec::new());
+
+    while !unvisited.is_empty() {
+        let evaluate_position = unvisited
+            .iter()
+            .min_by_key(|position| distances[position].0)
+            .unwrap();
+        let evaluate_distance = distances[evaluate_position].0;
+        if evaluate_distance == usize::MAX {
+            break;
+        }
+
+        for (hop_distance, next_node) in &graph[evaluate_position] {
+            let next_node_current_distance = distances.get_mut(next_node).unwrap();
+            if next_node_current_distance.0 > evaluate_distance + *hop_distance {
+                *next_node_current_distance = (evaluate_distance + hop_distance, Vec::new());
+            }
+            if next_node_current_distance.0 == evaluate_distance + *hop_distance {
+                next_node_current_distance.1.push(*evaluate_position);
+            }
+        }
+        unvisited.remove(&evaluate_position.clone());
+    }
+    distances
 }
 
 impl Vector2i {
